@@ -1,4 +1,4 @@
-name: "CodeQL Advanced"
+name: "CodeQL Analysis"
 
 on:
   push:
@@ -12,37 +12,40 @@ on:
 jobs:
   analyze:
     name: Analyze (${{ matrix.language }})
-    runs-on: ${{ (matrix.language == 'swift' && 'macos-latest') || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     permissions:
       security-events: write
-      packages: read
-      actions: read
       contents: read
 
     strategy:
       fail-fast: false
       matrix:
-        include:
-        - language: java-kotlin
-          build-mode: manual # Changed from autobuild to manual
+        language: [java]
+        build-mode: [manual]
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
 
+    - name: Set up JDK
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '17' # Update if you're using a different JDK version
+
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v3
       with:
         languages: ${{ matrix.language }}
-        build-mode: ${{ matrix.build-mode }}
         queries: +security-extended,security-and-quality
 
     - name: Build Code (Manual Build Mode)
-      if: matrix.build-mode == 'manual'
       run: |
-        # Replace this with your project's build command
+        cd path/to/your/project # Change this to the directory where your `gradlew` file is located
+        chmod +x gradlew
         ./gradlew clean build
-      shell: bash
+      env:
+        JAVA_TOOL_OPTIONS: -Dhttp.keepAlive=false -Dmaven.wagon.http.pool=false
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
