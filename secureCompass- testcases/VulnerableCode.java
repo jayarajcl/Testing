@@ -1,20 +1,42 @@
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import org.w3c.dom.Document;
-import java.io.StringReader;
-import javax.xml.parsers.ParserConfigurationException;
-import org.xml.sax.InputSource;
 
-public class XMLParser {
-    public static void main(String[] args) throws Exception {
-        String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-                   + "<!DOCTYPE root [<!ENTITY ext SYSTEM \"file:///etc/passwd\">]>"
-                   + "<root>&ext;</root>";
+    import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.Scanner;
 
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder builder = factory.newDocumentBuilder();
-        Document document = builder.parse(new InputSource(new StringReader(xml)));
+public class VulnerableCode {
 
-        System.out.println(document.getDocumentElement().getTextContent());
+    public static void main(String[] args) {
+        // Hardcoded credentials (vulnerability)
+        String dbUrl = "jdbc:mysql://localhost:3306/mydb";
+        String username = "admin";
+        String password = "password123";
+
+        try (Scanner scanner = new Scanner(System.in)) {
+            System.out.println("Enter username:");
+            String userInput = scanner.nextLine();
+
+            // Vulnerable SQL query (SQL Injection)
+            String query = "SELECT * FROM users WHERE username = '" + userInput + "'";
+
+            // Establishing database connection
+            Connection connection = DriverManager.getConnection(dbUrl, username, password);
+            Statement statement = connection.createStatement();
+
+            // Executing the vulnerable query
+            ResultSet resultSet = statement.executeQuery(query);
+
+            if (resultSet.next()) {
+                System.out.println("Welcome, " + resultSet.getString("username") + "!");
+            } else {
+                System.out.println("User not found.");
+            }
+
+        } catch (Exception e) {
+            // Generic exception handling (vulnerability)
+            e.printStackTrace();
+        }
     }
 }
+
