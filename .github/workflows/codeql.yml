@@ -1,6 +1,3 @@
-# CodeQL workflow with enhanced configuration for Java/Kotlin
-# Includes extended queries, custom build steps, and comprehensive scanning.
-
 name: "CodeQL Advanced"
 
 on:
@@ -27,8 +24,8 @@ jobs:
       matrix:
         include:
         - language: java-kotlin
-          build-mode: autobuild
-    
+          build-mode: manual # Changed from autobuild to manual
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -40,13 +37,13 @@ jobs:
         build-mode: ${{ matrix.build-mode }}
         queries: +security-extended,security-and-quality
 
-    # Build the project explicitly if needed (for Java/Kotlin)
-    - if: matrix.build-mode == 'manual'
-      shell: bash
+    - name: Build Code (Manual Build Mode)
+      if: matrix.build-mode == 'manual'
       run: |
-        ./gradlew build
+        # Replace this with your project's build command
+        ./gradlew clean build
+      shell: bash
 
-    # Perform the CodeQL analysis
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
       with:
